@@ -8,24 +8,46 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FLUTTER_HOME: ${{ runner.temp }}/flutter
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (required for Android)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 'stable'
+
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl unzip xz-utils zip
+
+      - name: Clone Flutter stable (shallow)
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable --depth 1 "${{ env.FLUTTER_HOME }}"
+
+      - name: Add Flutter to PATH
+        run: echo "${{ env.FLUTTER_HOME }}/bin" >> $GITHUB_PATH
+
+      - name: Verify Flutter
+        run: |
+          flutter --version
+          flutter doctor -v
+
       - name: Flutter pub get
         run: flutter pub get
-      - name: Ensure android/ and ios/ exist
+
+      - name: Ensure android/ and ios/ exist (create project files if missing)
         run: |
           flutter create .
+
       - name: Build APK (release)
         run: flutter build apk --release --no-shrink
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

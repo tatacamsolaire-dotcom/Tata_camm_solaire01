@@ -1,55 +1,33 @@
 name: Build Flutter APK
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FLUTTER_HOME: ${{ runner.temp }}/flutter
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java (required for Android)
-        uses: actions/setup-java@v4
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          channel: 'stable'
+          flutter-version: '3.19.6'
 
-      - name: Install required packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git curl unzip xz-utils zip
-
-      - name: Clone Flutter stable (shallow)
-        run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1 "${{ env.FLUTTER_HOME }}"
-
-      - name: Add Flutter to PATH
-        run: echo "${{ env.FLUTTER_HOME }}/bin" >> $GITHUB_PATH
-
-      - name: Verify Flutter
-        run: |
-          flutter --version
-          flutter doctor -v
-
-      - name: Flutter pub get
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: Ensure android/ and ios/ exist (create project files if missing)
-        run: |
-          flutter create .
+      - name: Build APK
+        run: flutter build apk --release
 
-      - name: Build APK (release)
-        run: flutter build apk --release --no-shrink
-
-      - name: Upload artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
+          name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk

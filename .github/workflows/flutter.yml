@@ -23,6 +23,11 @@ jobs:
           flutter-version: '3.16.0'
           channel: 'stable'
 
+      - name: Install Android SDK 34
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
       - name: Flutter doctor
         run: flutter doctor -v
 

@@ -17,39 +17,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.0'
           channel: 'stable'
 
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Install Android SDK 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
-
       - name: Flutter doctor
-        run: flutter doctor -v
+        run: flutter doctor
 
-      - name: Create Flutter project scaffold (if needed)
-        run: |
-          if [ ! -d "android" ]; then
-            flutter create -t app . \
-              --project-name=gestion_de_vente_pro \
-              --org=com.tatacamm
-          fi
+      - name: Create Android platform (VERY IMPORTANT)
+        run: flutter create .
 
-      - name: Flutter pub get
+      - name: Get dependencies
         run: flutter pub get
 
       - name: Build debug APK
         run: flutter build apk --debug
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk

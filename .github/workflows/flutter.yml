@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -24,10 +24,15 @@ jobs:
           channel: 'stable'
 
       - name: Flutter doctor
-        run: flutter doctor
+        run: flutter doctor -v
 
       - name: Create Flutter project scaffold (if needed)
-        run: flutter create . --project-name=gestion_de_vente_pro --org=com.tatacamm || true
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create -t app . \
+              --project-name=gestion_de_vente_pro \
+              --org=com.tatacamm
+          fi
 
       - name: Flutter pub get
         run: flutter pub get
@@ -35,7 +40,7 @@ jobs:
       - name: Build debug APK
         run: flutter build apk --debug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
